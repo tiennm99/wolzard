@@ -1,13 +1,17 @@
 # Wolzard
 
-A tiny WebGL toy that draws **Wolzard**, the Wolf Knight from *Mahou Sentai
-Magiranger*, and animates his **Henshin transformation** from the base Knight
-form into **Wolzard Fire** — built with **JavaScript + Three.js only**.
+A WebGL toy that draws **Wolzard**, the Wolf Knight from *Mahou Sentai
+Magiranger*, as a detailed articulated action-figure and animates his **Henshin
+transformation** from the base Knight form into **Wolzard Fire** — built with
+**JavaScript + Three.js only**.
 
-The whole character (armour, wolf-motif helmet, pauldron spikes, cape and living
-sword) is modelled from Three.js primitives. A single `fireLevel` value morphs
-the model between forms: gold trim re-forges into molten red-orange, the eyes
-ignite, the cape deepens to crimson and living flames erupt from the armour.
+The whole figure is modelled from Three.js primitives: a wolf-head helmet
+(silver muzzle, ears, fangs, glowing eyes, mane), layered ornate armour with a
+chest wolf emblem, visible ball joints, gold-trimmed pauldron spikes, a folded
+cape, an ornate wolf sword, and a hex display stand — lit with PBR metal
+reflections and soft shadows. A single `fireLevel` value morphs between forms:
+gold trim re-forges into molten red-orange, the eyes ignite, the cape brightens
+to crimson and living flames erupt from the armour.
 
 ## Run
 
@@ -32,6 +36,7 @@ Three.js is loaded from a CDN via the import map in `index.html`, so there is
 | Zoom | scroll |
 | Reset camera | **Reset Pose** button |
 | Toggle idle spin | **Auto-rotate** checkbox |
+| Open straight into Fire form | load the page at `#fire` (e.g. `.../wolzard/#fire`) |
 
 ## Files
 
