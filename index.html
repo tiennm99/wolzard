@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wolzard — Mahou Sentai Magiranger</title>
+  <link rel="stylesheet" href="./src/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene"></canvas>
+
+    <header id="hud-top">
+      <h1>WOLZARD</h1>
+      <p class="subtitle">Heavenly Saint Blagel · Mahou Sentai Magiranger</p>
+    </header>
+
+    <div id="form-label">
+      <span class="form-tag">FORM</span>
+      <span id="form-name">Wolzard</span>
+    </div>
+
+    <div id="controls">
+      <button id="btn-transform" class="btn btn-primary">
+        <span class="glyph">&#9876;</span> Henshin — Transform
+      </button>
+      <button id="btn-reset" class="btn">Reset Pose</button>
+      <label class="toggle">
+        <input type="checkbox" id="chk-rotate" checked />
+        Auto-rotate
+      </label>
+    </div>
+
+    <div id="hint">Drag to orbit · Scroll to zoom · Transform toggles Knight &#8644; Wolzard&nbsp;Fire</div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
