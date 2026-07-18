@@ -5,13 +5,14 @@ Magiranger*, that animates his **Henshin transformation** from the base Knight
 form into **Wolzard Fire** — built with **plain HTML5 Canvas 2D + JavaScript**
 (no framework, no WebGL).
 
-The figure is traced from a reference photo: the character is segmented from the
-background and sampled into ~6,600 colored dots, so the silhouette and shading
-stay faithful to the real Wolzard. Each dot also carries a precomputed "fire"
-color (a molten ramp keyed off its brightness); a single `fireLevel` value
-cross-fades every dot from purple-and-gold Knight into a lava-red **Wolzard
-Fire**, with rising flame particles. On load the dots fly in and assemble into
-the figure.
+The figure is traced from a reference photo: the source is upscaled (Lanczos)
+for smoother colour, the character is cut from its background by flood-filling
+the borders inward, and the result is sampled into ~8,800 round colored dots —
+so the silhouette and shading stay faithful to the real Wolzard. Each dot also
+carries a precomputed "fire" color (a molten ramp keyed off its brightness); a
+single `fireLevel` value cross-fades every dot from purple-and-gold Knight into
+a lava-red **Wolzard Fire**, with rising flame particles. On load the dots fly
+in and assemble into the figure.
 
 > Fan project. Wolzard and Mahou Sentai Magiranger are © Toei; the reference
 > imagery belongs to its respective owners and is used here only to derive a

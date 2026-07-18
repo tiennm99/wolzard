@@ -58,6 +58,10 @@ export class DotFigure {
     this.fg = new Uint8Array(this.n);
     this.fb = new Uint8Array(this.n);
 
+    // Cached fillStyle strings so idle frames avoid per-dot string allocs.
+    this.knightStr = new Array(this.n);
+    this.fireStr = new Array(this.n);
+
     for (let i = 0; i < this.n; i++) {
       const [x, y, c] = raw[i];
       this.hx[i] = x - cx;
@@ -68,6 +72,8 @@ export class DotFigure {
       const [fr, fg, fb] = fireRamp(Math.min(1, lum * 1.05 + 0.05));
       this.fr[i] = fr; this.fg[i] = fg; this.fb[i] = fb;
       this.phase[i] = Math.random() * Math.PI * 2;
+      this.knightStr[i] = `rgb(${r},${g},${b})`;
+      this.fireStr[i] = `rgb(${fr},${fg},${fb})`;
     }
 
     // Average cell size (data units) → drives dot render size.
@@ -136,24 +142,33 @@ export class DotFigure {
 
   // Draw centred at (ox, oy) with `scale` data-units→px, blending to Fire.
   draw(ctx, ox, oy, scale, fireLevel, time) {
-    const size = Math.max(1.2, this.cell * scale * 0.92);
-    const half = size / 2;
-    const shimmer = 0.35 * scale;
+    // Round dots, slightly overlapping for smooth coverage.
+    const radius = Math.max(0.8, this.cell * scale * 0.6);
+    const shimmer = 0.3 * scale;
+    const TWO_PI = Math.PI * 2;
+
+    // Steady Knight / Fire frames reuse cached colour strings (no allocs);
+    // only the cross-fade recomputes per dot.
+    const blend = fireLevel > 0.004 && fireLevel < 0.996;
+    const cache = fireLevel <= 0.004 ? this.knightStr : this.fireStr;
 
     for (let i = 0; i < this.n; i++) {
       const jx = Math.sin(time * 1.6 + this.phase[i]) * shimmer;
       const jy = Math.cos(time * 1.4 + this.phase[i]) * shimmer;
-      const px = ox + (this.cxp[i]) * scale + jx;
-      const py = oy + (this.cyp[i]) * scale + jy;
+      const px = ox + this.cxp[i] * scale + jx;
+      const py = oy + this.cyp[i] * scale + jy;
 
-      let r = this.kr[i], g = this.kg[i], b = this.kb[i];
-      if (fireLevel > 0) {
-        r = (r + (this.fr[i] - r) * fireLevel) | 0;
-        g = (g + (this.fg[i] - g) * fireLevel) | 0;
-        b = (b + (this.fb[i] - b) * fireLevel) | 0;
+      if (blend) {
+        const r = (this.kr[i] + (this.fr[i] - this.kr[i]) * fireLevel) | 0;
+        const g = (this.kg[i] + (this.fg[i] - this.kg[i]) * fireLevel) | 0;
+        const b = (this.kb[i] + (this.fb[i] - this.kb[i]) * fireLevel) | 0;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+      } else {
+        ctx.fillStyle = cache[i];
       }
-      ctx.fillStyle = `rgb(${r},${g},${b})`;
-      ctx.fillRect(px - half, py - half, size, size);
+      ctx.beginPath();
+      ctx.arc(px, py, radius, 0, TWO_PI);
+      ctx.fill();
     }
 
     // Flame particles (additive glow).
