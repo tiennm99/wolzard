@@ -1,18 +1,18 @@
 # Wolzard
 
-A 2D **dot-art** recreation of **Wolzard**, the Wolf Knight from *Mahou Sentai
+A 2D **dot-art** portrait of **Wolzard**, the Wolf Knight from *Mahou Sentai
 Magiranger*, that animates his **Henshin transformation** from the base Knight
 form into **Wolzard Fire** — built with **plain HTML5 Canvas 2D + JavaScript**
 (no framework, no WebGL).
 
-The figure is traced from a reference photo: the source is upscaled (Lanczos)
-for smoother colour, the character is cut from its background by flood-filling
-the borders inward, and the result is sampled into ~35,000 round colored dots
-(near the source image's real-pixel ceiling) — so the silhouette and shading
-stay faithful to the real Wolzard. Each dot also carries a precomputed "fire"
-color (a molten ramp keyed off its brightness); a single `fireLevel` value
-cross-fades from purple-and-gold Knight into a lava-red **Wolzard Fire**, with
-rising flame particles. On load the dots fly in and assemble into the figure.
+The portrait is traced from a high-resolution (1440×1080) photo of Wolzard's
+wolf-motif helmet: the character is cut from its background with `rembg`
+(u2net) and sampled through the resulting alpha mask into ~52,000 round colored
+dots — so every edge of the helmet, gold trim and visor stays faithful to the
+real suit. Each dot also carries a precomputed "fire" color (a molten ramp
+keyed off its brightness); a single `fireLevel` value cross-fades from
+purple-and-gold Knight into a lava-red **Wolzard Fire**, with rising flame
+particles. On load the dots fly in and assemble into the figure.
 
 To stay smooth at that dot count, the formed figure is rasterised once into
 offscreen **Knight** and **Fire** buffers and then just cross-faded/blitted each
