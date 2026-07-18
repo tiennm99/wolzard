@@ -140,52 +140,83 @@ export class DotFigure {
     if (this.particles.length > 600) this.particles.splice(0, this.particles.length - 600);
   }
 
-  // Draw centred at (ox, oy) with `scale` data-units→px, blending to Fire.
-  draw(ctx, ox, oy, scale, fireLevel, time) {
-    // Round dots, slightly overlapping for smooth coverage.
-    const radius = Math.max(0.8, this.cell * scale * 0.6);
-    const shimmer = 0.3 * scale;
+  // Pre-render the fully-formed figure into Knight + Fire offscreen buffers.
+  // With ~35k dots, drawing every dot each frame is too slow, so the formed
+  // figure is rasterised once per (scale, dpr) and blitted thereafter.
+  _ensureBuffers(scale, dpr) {
+    if (this.knightBuf && this._bufScale === scale && this._bufDpr === dpr) return;
+    const radius = Math.max(0.8, this.cell * scale * 0.62);
+    const pad = radius + 2;
+    const cssW = this.vw * scale + pad * 2;
+    const cssH = this.vh * scale + pad * 2;
+    const midX = cssW / 2, midY = cssH / 2;
     const TWO_PI = Math.PI * 2;
 
-    // Steady Knight / Fire frames reuse cached colour strings (no allocs);
-    // only the cross-fade recomputes per dot.
-    const blend = fireLevel > 0.004 && fireLevel < 0.996;
-    const cache = fireLevel <= 0.004 ? this.knightStr : this.fireStr;
+    const build = (colorStr) => {
+      const cv = document.createElement("canvas");
+      cv.width = Math.ceil(cssW * dpr);
+      cv.height = Math.ceil(cssH * dpr);
+      const b = cv.getContext("2d");
+      b.scale(dpr, dpr);
+      for (let i = 0; i < this.n; i++) {
+        b.fillStyle = colorStr[i];
+        b.beginPath();
+        b.arc(midX + this.hx[i] * scale, midY + this.hy[i] * scale, radius, 0, TWO_PI);
+        b.fill();
+      }
+      return cv;
+    };
 
+    this.knightBuf = build(this.knightStr);
+    this.fireBuf = build(this.fireStr);
+    this._bufCssW = cssW;
+    this._bufCssH = cssH;
+    this._bufScale = scale;
+    this._bufDpr = dpr;
+  }
+
+  // Render centred at (ox, oy). `scale` = data-units→css-px, `dpr` for crisp
+  // buffers. Fly-in uses a cheap square path; the formed figure blits buffers.
+  render(ctx, ox, oy, scale, dpr, fireLevel, time) {
+    if (this.assemble < 1) {
+      this._drawAssembling(ctx, ox, oy, scale, fireLevel);
+    } else {
+      this._ensureBuffers(scale, dpr);
+      const dx = ox - this._bufCssW / 2;
+      const dy = oy - this._bufCssH / 2 + Math.sin(time * 1.4) * 3; // gentle bob
+      ctx.drawImage(this.knightBuf, dx, dy, this._bufCssW, this._bufCssH);
+      if (fireLevel > 0.002) {
+        ctx.globalAlpha = Math.min(1, fireLevel);
+        ctx.drawImage(this.fireBuf, dx, dy, this._bufCssW, this._bufCssH);
+        ctx.globalAlpha = 1;
+      }
+    }
+    this._drawParticles(ctx, ox, oy, scale);
+  }
+
+  // Cheap fly-in: eased square dots (fillRect is far faster than 35k arcs).
+  _drawAssembling(ctx, ox, oy, scale, fireLevel) {
+    const size = Math.max(1, this.cell * scale * 1.05);
+    const half = size / 2;
+    const cache = fireLevel <= 0.5 ? this.knightStr : this.fireStr;
     for (let i = 0; i < this.n; i++) {
-      const jx = Math.sin(time * 1.6 + this.phase[i]) * shimmer;
-      const jy = Math.cos(time * 1.4 + this.phase[i]) * shimmer;
-      const px = ox + this.cxp[i] * scale + jx;
-      const py = oy + this.cyp[i] * scale + jy;
-
-      if (blend) {
-        const r = (this.kr[i] + (this.fr[i] - this.kr[i]) * fireLevel) | 0;
-        const g = (this.kg[i] + (this.fg[i] - this.kg[i]) * fireLevel) | 0;
-        const b = (this.kb[i] + (this.fb[i] - this.kb[i]) * fireLevel) | 0;
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
-      } else {
-        ctx.fillStyle = cache[i];
-      }
-      ctx.beginPath();
-      ctx.arc(px, py, radius, 0, TWO_PI);
-      ctx.fill();
+      ctx.fillStyle = cache[i];
+      ctx.fillRect(ox + this.cxp[i] * scale - half, oy + this.cyp[i] * scale - half, size, size);
     }
+  }
 
-    // Flame particles (additive glow).
-    if (this.particles.length) {
-      ctx.globalCompositeOperation = "lighter";
-      for (const p of this.particles) {
-        const t = p.age / p.life;
-        const a = (1 - t) * 0.8;
-        const s = p.size * scale * (1 - t * 0.5);
-        // hot core -> orange -> smoke
-        const r = 255;
-        const g = Math.round(200 - t * 160);
-        const b = Math.round(80 - t * 80);
-        ctx.fillStyle = `rgba(${r},${g},${Math.max(0, b)},${a})`;
-        ctx.fillRect(ox + p.x * scale - s / 2, oy + p.y * scale - s / 2, s, s);
-      }
-      ctx.globalCompositeOperation = "source-over";
+  _drawParticles(ctx, ox, oy, scale) {
+    if (!this.particles.length) return;
+    ctx.globalCompositeOperation = "lighter";
+    for (const p of this.particles) {
+      const t = p.age / p.life;
+      const a = (1 - t) * 0.8;
+      const s = p.size * scale * (1 - t * 0.5);
+      const g = Math.round(200 - t * 160);
+      const b = Math.max(0, Math.round(80 - t * 80));
+      ctx.fillStyle = `rgba(255,${g},${b},${a})`;
+      ctx.fillRect(ox + p.x * scale - s / 2, oy + p.y * scale - s / 2, s, s);
     }
+    ctx.globalCompositeOperation = "source-over";
   }
 }

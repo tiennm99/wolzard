@@ -91,7 +91,7 @@ function frame(now) {
   const scale = (H * 0.74) / figure.vh;
   const ox = W / 2;
   const oy = H * 0.5;
-  figure.draw(ctx, ox, oy, scale, state.fire, time);
+  figure.render(ctx, ox, oy, scale, DPR, state.fire, time);
 
   requestAnimationFrame(frame);
 }

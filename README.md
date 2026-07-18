@@ -7,12 +7,16 @@ form into **Wolzard Fire** — built with **plain HTML5 Canvas 2D + JavaScript**
 
 The figure is traced from a reference photo: the source is upscaled (Lanczos)
 for smoother colour, the character is cut from its background by flood-filling
-the borders inward, and the result is sampled into ~8,800 round colored dots —
-so the silhouette and shading stay faithful to the real Wolzard. Each dot also
-carries a precomputed "fire" color (a molten ramp keyed off its brightness); a
-single `fireLevel` value cross-fades every dot from purple-and-gold Knight into
-a lava-red **Wolzard Fire**, with rising flame particles. On load the dots fly
-in and assemble into the figure.
+the borders inward, and the result is sampled into ~35,000 round colored dots
+(near the source image's real-pixel ceiling) — so the silhouette and shading
+stay faithful to the real Wolzard. Each dot also carries a precomputed "fire"
+color (a molten ramp keyed off its brightness); a single `fireLevel` value
+cross-fades from purple-and-gold Knight into a lava-red **Wolzard Fire**, with
+rising flame particles. On load the dots fly in and assemble into the figure.
+
+To stay smooth at that dot count, the formed figure is rasterised once into
+offscreen **Knight** and **Fire** buffers and then just cross-faded/blitted each
+frame; only the fly-in and the flame particles draw dynamically.
 
 > Fan project. Wolzard and Mahou Sentai Magiranger are © Toei; the reference
 > imagery belongs to its respective owners and is used here only to derive a
