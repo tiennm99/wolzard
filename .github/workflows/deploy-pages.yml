@@ -1,7 +1,8 @@
 name: Deploy to GitHub Pages
 
-# Publish the static site (index.html + src/) to GitHub Pages on every push
-# to main. No build step — the app loads Three.js from a CDN import map.
+# Publish the static site (index.html + src/ + assets/) to GitHub Pages on every
+# push to main. No build step and no dependencies — it is plain ES modules and
+# Canvas 2D, so the repo is uploaded as-is.
 
 on:
   push:

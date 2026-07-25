@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Wolzard">
+  <!-- Abstracted wolf-helmet crest: centre spike between two swept horns, with
+       the visor carrying the fire colour. Kept to three solid shapes so it still
+       reads at 16px. -->
+  <rect width="64" height="64" rx="13" fill="#07070c"/>
+  <path d="M32 6 L41 24 L52 16 L48 39 L32 58 L16 39 L12 16 L23 24 Z" fill="#d4af37"/>
+  <path d="M32 25 L43 33 L32 48 L21 33 Z" fill="#0b0a10"/>
+  <path d="M32 31 L38.5 34.5 L32 43.5 L25.5 34.5 Z" fill="#ff5a1f"/>
+</svg>

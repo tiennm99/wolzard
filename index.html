@@ -3,32 +3,107 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Wolzard — Mahou Sentai Magiranger</title>
+  <title>Wolzard — Dot-Art Henshin | Mahou Sentai Magiranger</title>
+  <meta name="description"
+    content="A 52,000-dot canvas portrait of Wolzard, the Wolf Knight, that ignites into Wolzard Fire. A fan-made cinematic built in plain HTML5 Canvas 2D." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#05060a" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Wolzard — Dot-Art Henshin" />
+  <meta property="og:description"
+    content="52,000 dots traced from the Wolf Knight's helmet, igniting into Wolzard Fire. Plain Canvas 2D, no frameworks." />
+  <meta property="og:image" content="https://tiennm99.github.io/wolzard/assets/og.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Wolzard — Dot-Art Henshin" />
+  <meta name="twitter:description"
+    content="52,000 dots traced from the Wolf Knight's helmet, igniting into Wolzard Fire." />
+  <meta name="twitter:image" content="https://tiennm99.github.io/wolzard/assets/og.jpg" />
+
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="./src/style.css" />
+  <link rel="modulepreload" href="./src/wolzard-dots.js" />
+
+  <style>
+    /* Boot overlay, inlined so it paints before the 947 KB dot module is even
+       fetched. Its animations are transform/opacity only, which the compositor
+       keeps running on its own thread — so it stays alive through the long main
+       thread block where that data is parsed and the dot buffers are built. */
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      background: #05060a;
+      display: grid;
+      place-items: center;
+      transition: opacity 0.5s ease;
+    }
+    #boot::before,
+    #boot::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 11.5vh;
+      background: #000;
+    }
+    #boot::before { top: 0; }
+    #boot::after { bottom: 0; }
+    #boot i {
+      display: block;
+      width: min(38vw, 260px);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #d4af37, transparent);
+      animation: boot-breathe 1.6s ease-in-out infinite;
+      will-change: transform, opacity;
+    }
+    @keyframes boot-breathe {
+      0%, 100% { opacity: 0.25; transform: scaleX(0.35); }
+      50%      { opacity: 1;    transform: scaleX(1); }
+    }
+    body.booted #boot { opacity: 0; pointer-events: none; }
+    @media (prefers-reduced-motion: reduce) {
+      #boot i { animation: none; opacity: 0.7; }
+    }
+  </style>
 </head>
 <body>
   <div id="app">
-    <canvas id="scene"></canvas>
+    <canvas id="scene" role="img"
+      aria-label="Dot-art portrait of Wolzard, the Wolf Knight from Mahou Sentai Magiranger, rendered as tens of thousands of coloured dots that ignite from purple-and-gold armour into molten red Wolzard Fire."></canvas>
 
-    <header id="hud-top">
-      <h1>WOLZARD</h1>
-      <p class="subtitle">Heavenly Saint Blagel · Mahou Sentai Magiranger</p>
-    </header>
+    <!-- Skip is first in the DOM so it is the first stop for keyboard users
+         while the cinematic is the only thing on screen. -->
+    <button id="btn-skip" class="btn btn-ghost">Skip intro</button>
 
-    <div id="form-label">
-      <span class="form-tag">FORM</span>
-      <span id="form-name">Wolzard</span>
+    <p id="lockup"><span>Wolzard</span> · Mahou Sentai Magiranger</p>
+
+    <div id="title-card" aria-hidden="true">
+      <h2>WOLZARD</h2>
+      <p id="title-form">FIRE</p>
     </div>
 
     <div id="controls">
-      <button id="btn-transform" class="btn btn-primary">
-        <span class="glyph">&#9876;</span> Henshin — Transform
-      </button>
-      <button id="btn-reset" class="btn">Re-materialize</button>
+      <button id="btn-transform" class="btn btn-primary">Henshin</button>
+      <button id="btn-cine" class="btn btn-ghost">Replay intro</button>
+      <button id="btn-shots" class="btn btn-ghost" aria-expanded="false" aria-controls="shots">Shots</button>
+      <span id="form-chip"><b id="form-name">Wolzard</b></span>
     </div>
 
-    <div id="hint">Space / button toggles Knight &#8644; Wolzard&nbsp;Fire · press R to re-materialize the dots</div>
+    <div id="shots" hidden></div>
+
+    <p id="keys">
+      <kbd>Space</kbd> henshin <kbd>1</kbd>–<kbd>6</kbd> shots <kbd>C</kbd> replay <kbd>S</kbd> save frame
+    </p>
+
+    <!-- Announces form changes the user caused. Not written to per-frame. -->
+    <p id="live" role="status" aria-live="polite" class="sr-only"></p>
   </div>
+
+  <div id="boot"><i></i></div>
 
   <script type="module" src="./src/main.js"></script>
 </body>
